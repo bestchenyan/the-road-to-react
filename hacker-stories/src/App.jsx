@@ -68,20 +68,20 @@ const Search = ({ search, onSearch }) => {
 
 const List = ({ list }) => (
   <ul>
-    {list.map((item) => (
-      <Item key={item.title} item={item} />
+    {list.map(({ objectId, ...item }) => (
+      <Item key={objectId} {...item} />
     ))}
   </ul>
 );
 
-const Item = ({ item }) => (
-  <li key={item.title}>
+const Item = ({ url, title, auther, num_comments, points }) => (
+  <li>
     <span>
-      <a href={item.url}>{item.title}</a>
+      <a href={url}>{title}</a>
     </span>
-    <span> {item.auther} </span>
-    <span>{item.num_comments}</span>
-    <span>{item.points}</span>
+    <span> {auther} </span>
+    <span>{num_comments}</span>
+    <span>{points}</span>
   </li>
 );
 
