@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import "./App.css";
 
 // const title = "Hello React";
@@ -48,12 +48,12 @@ const App = () => {
   );
 
   return (
-    <div>
+    <>
       <h1>{welcome.greeting + welcome.title}</h1>
       <Search search={searchTerm} onSearch={handleSearch} />
       <hr />
       <List list={searchStories} />
-    </div>
+    </>
   );
 };
 
@@ -64,14 +64,14 @@ const Search = ({ search, onSearch }) => {
     onSearch(event);
   };
   return (
-    <>
+    <Fragment>
       <label htmlFor="search">Search: </label>
       <input type="text" id="search" value={search} onChange={handleChange} />
 
       <p>
         Searching for <strong>{search}</strong>.
       </p>
-    </>
+    </Fragment>
   );
 };
 
