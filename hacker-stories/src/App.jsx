@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./App.css";
 
 // const title = "Hello React";
@@ -8,6 +9,8 @@ const welcome = {
 };
 
 const App = () => {
+  console.log("App renders");
+
   const stories = [
     {
       title: "React",
@@ -38,14 +41,21 @@ const App = () => {
 };
 
 const Search = () => {
+  console.log("Search renders");
+
+  const [searchTerm, setSearchTerm] = useState("");
+
   const handleChange = (event) => {
-    console.log(event);
-    console.log(event.target.value);
+    setSearchTerm(event.target.value);
   };
   return (
     <>
       <label htmlFor="search">Search: </label>
       <input type="text" id="search" onChange={handleChange} />
+
+      <p>
+        Searching for <strong>{searchTerm}</strong>.
+      </p>
     </>
   );
 };
