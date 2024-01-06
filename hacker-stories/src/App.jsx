@@ -9,8 +9,6 @@ const welcome = {
 };
 
 const App = () => {
-  console.log("App renders");
-
   const stories = [
     {
       title: "React",
@@ -30,23 +28,29 @@ const App = () => {
     },
   ];
 
+  const handleSearch = (e) => {
+    console.log(e.target.value);
+  };
+
   return (
     <div>
       <h1>{welcome.greeting + welcome.title}</h1>
-      <Search />
+      <Search onSearch={handleSearch} />
       <hr />
       <List list={stories} />
     </div>
   );
 };
 
-const Search = () => {
+const Search = ({ onSearch }) => {
   console.log("Search renders");
 
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleChange = (event) => {
     setSearchTerm(event.target.value);
+
+    onSearch(event);
   };
   return (
     <>
