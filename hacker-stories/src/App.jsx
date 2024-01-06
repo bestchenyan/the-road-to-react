@@ -65,15 +65,26 @@ const Search = ({ search, onSearch }) => {
   };
   return (
     <Fragment>
-      <label htmlFor="search">Search: </label>
-      <input type="text" id="search" value={search} onChange={handleChange} />
-
+      <InputWithLabel
+        id="search"
+        label="search"
+        value={search}
+        onInputChange={handleChange}
+      />
       <p>
         Searching for <strong>{search}</strong>.
       </p>
     </Fragment>
   );
 };
+
+const InputWithLabel = ({ id, label, value, type = "text", onInputChange }) => (
+  <>
+    <label htmlFor={id}>{label}: </label>
+    &nbsp;
+    <input type={type} id={id} value={value} onChange={onInputChange} />
+  </>
+);
 
 const List = ({ list }) => (
   <ul>
