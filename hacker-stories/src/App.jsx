@@ -8,25 +8,6 @@ const welcome = {
   title: "React",
 };
 
-const initialStories = [
-  {
-    title: "React",
-    url: "https://react.js.org/",
-    auther: "Jordan Walke",
-    num_comments: 3,
-    points: 4,
-    objectId: 0,
-  },
-  {
-    title: "Redux",
-    url: "https://redux.js.org/",
-    auther: "Dan Abramov, Andrew Clark",
-    num_comments: 2,
-    points: 5,
-    objectId: 1,
-  },
-];
-
 const useStorageState = (key, initialState) => {
   const [value, setValue] = useState(localStorage.getItem(key) || initialState);
   useEffect(() => {
@@ -35,11 +16,6 @@ const useStorageState = (key, initialState) => {
 
   return [value, setValue];
 };
-
-const getAsyncStories = () =>
-  new Promise((resolve) =>
-    setTimeout(() => resolve({ data: { stories: initialStories } }), 2000)
-  );
 
 const storiesReducer = (state, action) => {
   switch (action.type) {
@@ -74,6 +50,8 @@ const storiesReducer = (state, action) => {
   }
 };
 
+const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "");
   const [stories, dispatchStories] = useReducer(storiesReducer, {
@@ -100,11 +78,12 @@ const App = () => {
   useEffect(() => {
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
-    getAsyncStories()
-      .then((res) => {
+    fetch(`${API_ENDPOINT}react`)
+      .then((response) => response.json())
+      .then((result) => {
         dispatchStories({
           type: "STORIES_FETCH_SUCCESS",
-          payload: res.data.stories,
+          payload: result.hits, // D
         });
       })
       .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
@@ -181,8 +160,12 @@ const InputWithLabel = ({
 
 const List = ({ list, onRemoveItem }) => (
   <ul>
-    {list.map((item) => (
-      <Item key={item.objectId} item={item} onRemoveItem={onRemoveItem} />
+    {list.map((item, index) => (
+      <Item
+        key={`${item.objectId}-${index}`}
+        item={item}
+        onRemoveItem={onRemoveItem}
+      />
     ))}
   </ul>
 );
