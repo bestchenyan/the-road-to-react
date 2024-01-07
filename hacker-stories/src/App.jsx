@@ -73,8 +73,9 @@ const App = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (e) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
+    e.preventDefault();
   };
 
   const handleRemoveStory = (item) => {
@@ -84,18 +85,18 @@ const App = () => {
     });
   };
 
-  const handleFetchStories = useCallback(() => {
+  const handleFetchStories = useCallback(async () => {
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
-    axios
-      .get(url)
-      .then((result) => {
-        dispatchStories({
-          type: "STORIES_FETCH_SUCCESS",
-          payload: result.data.hits,
-        });
-      })
-      .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
+    try {
+      const result = await axios.get(url);
+      dispatchStories({
+        type: "STORIES_FETCH_SUCCESS",
+        payload: result.data.hits,
+      });
+    } catch {
+      dispatchStories({ type: "STORIES_FETCH_FAILURE" });
+    }
   }, [url]);
 
   useEffect(() => {
@@ -124,7 +125,7 @@ const App = () => {
 const Search = ({ search, handleSearchInput, handleSearchSubmit }) => {
   return (
     <Fragment>
-      <InputWithLabel
+      {/* <InputWithLabel
         id="search"
         label="search"
         value={search}
@@ -135,7 +136,20 @@ const Search = ({ search, handleSearchInput, handleSearchSubmit }) => {
       </InputWithLabel>
       <button type="button" disabled={!search} onClick={handleSearchSubmit}>
         Submit
-      </button>
+      </button> */}
+      <form onSubmit={handleSearchSubmit}>
+        <InputWithLabel
+          id="search"
+          value={search}
+          isFocused
+          onInputChange={handleSearchInput}
+        >
+          <strong>Search:</strong>
+        </InputWithLabel>
+        <button type="submit" disabled={!search}>
+          Submit
+        </button>
+      </form>
       <p>
         Searching for <strong>{search}</strong>.
       </p>
