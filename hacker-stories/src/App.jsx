@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useRef } from "react";
+import { useState, useEffect, Fragment, useRef, useReducer } from "react";
 import "./App.css";
 
 // const title = "Hello React";
@@ -41,36 +41,53 @@ const getAsyncStories = () =>
     setTimeout(() => resolve({ data: { stories: initialStories } }), 2000)
   );
 
+const storiesReducer = (state, action) => {
+  switch (action.type) {
+    case "SET_STORIES":
+      return action.payload;
+    case "REMOVE_STORY":
+      return state.filter(
+        (story) => action.payload.objectID !== story.objectID
+      );
+    default:
+      throw new Error();
+  }
+};
+
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "");
-  const [stories, setStories] = useState([]);
+  const [stories, dispatchStories] = useReducer(storiesReducer, []);
+
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
-
-  useEffect(() => {
-    setIsLoading(true);
-    getAsyncStories()
-      .then((res) => {
-        setStories(res.data.stories);
-        setIsLoading(false);
-      })
-      .catch(() => setIsError(true));
-  }, []);
-
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
 
   const searchStories = stories.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleRemoveStory = (item) => {
-    const newStories = stories.filter(
-      (story) => story.objectId !== item.objectId
-    );
-    setStories(newStories);
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
   };
+
+  const handleRemoveStory = (item) => {
+    dispatchStories({
+      type: "REMOVE_STORY",
+      payload: item,
+    });
+  };
+
+  useEffect(() => {
+    setIsLoading(true);
+    getAsyncStories()
+      .then((res) => {
+        dispatchStories({
+          type: "SET_STORIES",
+          payload: res.data.stories,
+        });
+        setIsLoading(false);
+      })
+      .catch(() => setIsError(true));
+  }, []);
 
   return (
     <>
