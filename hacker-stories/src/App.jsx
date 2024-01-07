@@ -43,12 +43,32 @@ const getAsyncStories = () =>
 
 const storiesReducer = (state, action) => {
   switch (action.type) {
-    case "SET_STORIES":
-      return action.payload;
+    case "STORIES_FETCH_INIT":
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case "STORIES_FETCH_SUCCESS":
+      return {
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+    case "STORIES_FETCH_FAILURE":
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
     case "REMOVE_STORY":
-      return state.filter(
-        (story) => action.payload.objectID !== story.objectID
-      );
+      return {
+        ...state,
+        data: state.data.filter(
+          (story) => action.payload.objectID !== story.objectID
+        ),
+      };
     default:
       throw new Error();
   }
@@ -56,12 +76,13 @@ const storiesReducer = (state, action) => {
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useStorageState("search", "");
-  const [stories, dispatchStories] = useReducer(storiesReducer, []);
+  const [stories, dispatchStories] = useReducer(storiesReducer, {
+    data: [],
+    isLoading: false,
+    isError: false,
+  });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [isError, setIsError] = useState(false);
-
-  const searchStories = stories.filter((story) =>
+  const searchStories = stories.data.filter((story) =>
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -77,16 +98,16 @@ const App = () => {
   };
 
   useEffect(() => {
-    setIsLoading(true);
+    dispatchStories({ type: "STORIES_FETCH_INIT" });
+
     getAsyncStories()
       .then((res) => {
         dispatchStories({
-          type: "SET_STORIES",
+          type: "STORIES_FETCH_SUCCESS",
           payload: res.data.stories,
         });
-        setIsLoading(false);
       })
-      .catch(() => setIsError(true));
+      .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
   }, []);
 
   return (
@@ -94,8 +115,8 @@ const App = () => {
       <h1>{welcome.greeting + welcome.title}</h1>
       <Search search={searchTerm} onSearch={handleSearch} />
       <hr />
-      {isError && <p>Something went wrong ...</p>}
-      {isLoading ? (
+      {stories.isError && <p>Something went wrong ...</p>}
+      {stories.isLoading ? (
         <p>Loading</p>
       ) : (
         <List list={searchStories} onRemoveItem={handleRemoveStory} />
