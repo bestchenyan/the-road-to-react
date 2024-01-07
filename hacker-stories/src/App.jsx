@@ -60,16 +60,21 @@ const storiesReducer = (state, action) => {
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
 const App = () => {
-  console.log("APP Render");
-  const [searchTerm, setSearchTerm] = useStorageState("search", "");
+  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
+  const [url, setUrl] = useState(`${API_ENDPOINT}${searchTerm}`);
+
   const [stories, dispatchStories] = useReducer(storiesReducer, {
     data: [],
     isLoading: false,
     isError: false,
   });
 
-  const handleSearch = (e) => {
+  const handleSearchInput = (e) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
   };
 
   const handleRemoveStory = (item) => {
@@ -80,20 +85,18 @@ const App = () => {
   };
 
   const handleFetchStories = useCallback(() => {
-    if (!searchTerm) return;
-
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
-    fetch(`${API_ENDPOINT}${searchTerm}`)
+    fetch(url)
       .then((response) => response.json())
       .then((result) => {
         dispatchStories({
           type: "STORIES_FETCH_SUCCESS",
-          payload: result.hits, // D
+          payload: result.hits,
         });
       })
       .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
-  }, [searchTerm]);
+  }, [url]);
 
   useEffect(() => {
     handleFetchStories();
@@ -102,7 +105,11 @@ const App = () => {
   return (
     <>
       <h1>{welcome.greeting + welcome.title}</h1>
-      <Search search={searchTerm} onSearch={handleSearch} />
+      <Search
+        search={searchTerm}
+        handleSearchInput={handleSearchInput}
+        handleSearchSubmit={handleSearchSubmit}
+      />
       <hr />
       {stories.isError && <p>Something went wrong ...</p>}
       {stories.isLoading ? (
@@ -114,12 +121,7 @@ const App = () => {
   );
 };
 
-const Search = ({ search, onSearch }) => {
-  console.log("Search renders");
-
-  const handleChange = (event) => {
-    onSearch(event);
-  };
+const Search = ({ search, handleSearchInput, handleSearchSubmit }) => {
   return (
     <Fragment>
       <InputWithLabel
@@ -127,10 +129,13 @@ const Search = ({ search, onSearch }) => {
         label="search"
         value={search}
         isFocused
-        onInputChange={handleChange}
+        onInputChange={handleSearchInput}
       >
         <strong>Search:</strong>
       </InputWithLabel>
+      <button type="button" disabled={!search} onClick={handleSearchSubmit}>
+        Submit
+      </button>
       <p>
         Searching for <strong>{search}</strong>.
       </p>
