@@ -1,4 +1,11 @@
-import { useState, useEffect, Fragment, useRef, useReducer } from "react";
+import {
+  useState,
+  useEffect,
+  Fragment,
+  useRef,
+  useReducer,
+  useCallback,
+} from "react";
 import "./App.css";
 
 // const title = "Hello React";
@@ -53,16 +60,13 @@ const storiesReducer = (state, action) => {
 const API_ENDPOINT = "https://hn.algolia.com/api/v1/search?query=";
 
 const App = () => {
+  console.log("APP Render");
   const [searchTerm, setSearchTerm] = useStorageState("search", "");
   const [stories, dispatchStories] = useReducer(storiesReducer, {
     data: [],
     isLoading: false,
     isError: false,
   });
-
-  const searchStories = stories.data.filter((story) =>
-    story.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -75,10 +79,12 @@ const App = () => {
     });
   };
 
-  useEffect(() => {
+  const handleFetchStories = useCallback(() => {
+    if (!searchTerm) return;
+
     dispatchStories({ type: "STORIES_FETCH_INIT" });
 
-    fetch(`${API_ENDPOINT}react`)
+    fetch(`${API_ENDPOINT}${searchTerm}`)
       .then((response) => response.json())
       .then((result) => {
         dispatchStories({
@@ -87,7 +93,11 @@ const App = () => {
         });
       })
       .catch(() => dispatchStories({ type: "STORIES_FETCH_FAILURE" }));
-  }, []);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    handleFetchStories();
+  }, [handleFetchStories]);
 
   return (
     <>
@@ -98,7 +108,7 @@ const App = () => {
       {stories.isLoading ? (
         <p>Loading</p>
       ) : (
-        <List list={searchStories} onRemoveItem={handleRemoveStory} />
+        <List list={stories.data} onRemoveItem={handleRemoveStory} />
       )}
     </>
   );
