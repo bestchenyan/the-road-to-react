@@ -8,6 +8,25 @@ const welcome = {
   title: "React",
 };
 
+const initialStories = [
+  {
+    title: "React",
+    url: "https://react.js.org/",
+    auther: "Jordan Walke",
+    num_comments: 3,
+    points: 4,
+    objectId: 0,
+  },
+  {
+    title: "Redux",
+    url: "https://redux.js.org/",
+    auther: "Dan Abramov, Andrew Clark",
+    num_comments: 2,
+    points: 5,
+    objectId: 1,
+  },
+];
+
 const useStorageState = (key, initialState) => {
   const [value, setValue] = useState(localStorage.getItem(key) || initialState);
   useEffect(() => {
@@ -18,26 +37,8 @@ const useStorageState = (key, initialState) => {
 };
 
 const App = () => {
-  const [searchTerm, setSearchTerm] = useStorageState("search", "React");
-
-  const stories = [
-    {
-      title: "React",
-      url: "https://react.js.org/",
-      auther: "Jordan Walke",
-      num_comments: 3,
-      points: 4,
-      objectId: 0,
-    },
-    {
-      title: "Redux",
-      url: "https://redux.js.org/",
-      auther: "Dan Abramov, Andrew Clark",
-      num_comments: 2,
-      points: 5,
-      objectId: 1,
-    },
-  ];
+  const [searchTerm, setSearchTerm] = useStorageState("search", "");
+  const [stories, setStories] = useState(initialStories);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -47,12 +48,19 @@ const App = () => {
     story.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleRemoveStory = (item) => {
+    const newStories = stories.filter(
+      (story) => story.objectId !== item.objectId
+    );
+    setStories(newStories);
+  };
+
   return (
     <>
       <h1>{welcome.greeting + welcome.title}</h1>
       <Search search={searchTerm} onSearch={handleSearch} />
       <hr />
-      <List list={searchStories} />
+      <List list={searchStories} onRemoveItem={handleRemoveStory} />
     </>
   );
 };
@@ -111,23 +119,35 @@ const InputWithLabel = ({
   );
 };
 
-const List = ({ list }) => (
+const List = ({ list, onRemoveItem }) => (
   <ul>
-    {list.map(({ objectId, ...item }) => (
-      <Item key={objectId} {...item} />
+    {list.map((item) => (
+      <Item key={item.objectId} item={item} onRemoveItem={onRemoveItem} />
     ))}
   </ul>
 );
 
-const Item = ({ url, title, auther, num_comments, points }) => (
-  <li>
-    <span>
-      <a href={url}>{title}</a>
-    </span>
-    <span> {auther} </span>
-    <span>{num_comments}</span>
-    <span>{points}</span>
-  </li>
-);
+const Item = ({ item, onRemoveItem }) => {
+  return (
+    <li>
+      <span>
+        <a href={item.url}>{item.title}</a>
+      </span>
+      <span> {item.auther} </span>
+      <span>{item.num_comments}</span>
+      <span>{item.points}</span>
+      <span>
+        <button
+          type="button"
+          onClick={() => {
+            onRemoveItem(item);
+          }}
+        >
+          Dismiss
+        </button>
+      </span>
+    </li>
+  );
+};
 
 export default App;
