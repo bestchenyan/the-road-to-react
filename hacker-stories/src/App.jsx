@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from "react";
+import { useState, useEffect, Fragment, useRef } from "react";
 import "./App.css";
 
 // const title = "Hello React";
@@ -69,6 +69,7 @@ const Search = ({ search, onSearch }) => {
         id="search"
         label="search"
         value={search}
+        isFocused
         onInputChange={handleChange}
       >
         <strong>Search:</strong>
@@ -85,14 +86,30 @@ const InputWithLabel = ({
   value,
   type = "text",
   onInputChange,
+  isFocused,
   children,
-}) => (
-  <>
-    <label htmlFor={id}>{children}</label>
-    &nbsp;
-    <input type={type} id={id} value={value} onChange={onInputChange} />
-  </>
-);
+}) => {
+  const inputRef = useRef();
+
+  useEffect(() => {
+    if (isFocused && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isFocused]);
+  return (
+    <>
+      <label htmlFor={id}>{children}</label>
+      &nbsp;
+      <input
+        ref={inputRef}
+        type={type}
+        id={id}
+        value={value}
+        onChange={onInputChange}
+      />
+    </>
+  );
+};
 
 const List = ({ list }) => (
   <ul>
