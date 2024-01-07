@@ -70,7 +70,9 @@ const Search = ({ search, onSearch }) => {
         label="search"
         value={search}
         onInputChange={handleChange}
-      />
+      >
+        <strong>Search:</strong>
+      </InputWithLabel>
       <p>
         Searching for <strong>{search}</strong>.
       </p>
@@ -78,9 +80,15 @@ const Search = ({ search, onSearch }) => {
   );
 };
 
-const InputWithLabel = ({ id, label, value, type = "text", onInputChange }) => (
+const InputWithLabel = ({
+  id,
+  value,
+  type = "text",
+  onInputChange,
+  children,
+}) => (
   <>
-    <label htmlFor={id}>{label}: </label>
+    <label htmlFor={id}>{children}</label>
     &nbsp;
     <input type={type} id={id} value={value} onChange={onInputChange} />
   </>
